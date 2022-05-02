@@ -6,7 +6,9 @@ This test has all the necessary components for a functional app with some missin
 
 Please fork this repo under your own github account and create a branch named `solution` once you are ready to start and commit as you would normally do under your own `solution` branch as we would love to see how you progress.
 
-Create a Pull Request from `solution` to `master` under your own repo. Add a notes in the PR description if there is anything you want to mention, e.g. extra details you added or functional choice you made or things that you could improve.
+### Note: Do not create Pull Request. 
+
+Share the link of the forked repository once you are finished with your `solution`.
 
 ## Technology
 This project is written in React with Typescript. However, it is not required for you to complete this test in Typescript. If this is your first time using Typescript, you can quickly (within 5 minutes) get started after reading this [guide](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html).
