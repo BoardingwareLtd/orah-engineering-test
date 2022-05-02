@@ -1,0 +1,22 @@
+{
+   "name": "backend-test",
+   "version": "0.0.1",
+   "private": true,
+   "description": "Awesome project developed with TypeORM.",
+   "devDependencies": {},
+   "dependencies": {
+      "@types/node": "^12.0.0",
+      "body-parser": "^1.18.1",
+      "cors": "^2.8.5",
+      "express": "^4.15.4",
+      "lodash": "^4.17.21",
+      "reflect-metadata": "^0.1.10",
+      "sqlite3": "^4.2.0",
+      "ts-node": "^9.0.0",
+      "typeorm": "0.2.32",
+      "typescript": "~4.0.5"
+   },
+   "scripts": {
+      "start": "ts-node src/index.ts"
+   }
+}
