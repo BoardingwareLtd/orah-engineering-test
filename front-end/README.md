@@ -1,18 +1,17 @@
 # Front End Engineering Test
 At Orah, most of our services are written in Javascript/Typescript. New features on the web are written in React with Typescript. This project will give you an idea of the codebase you will be working with as a front end engineer at Orah.
 
-## Technology
-This project is written in React with Typescript. However, it is not required for you to complete this test in Typescript. If this is your first time using Typescript, you can quickly (within 5 minutes) get started after reading this [guide](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html).
-
-We use [styled-component](https://styled-components.com/docs/basics#getting-started) for styling in this project. Feel free to use `css` or `sass` if you are more comfortable with them.
-
-
 ## Instructions
 This test has all the necessary components for a functional app with some missing functionality which you will need to implement, however please feel free to add any files/components you deem useful.
 
 Please fork this repo under your own github account and create a branch named `solution` once you are ready to start and commit as you would normally do under your own `solution` branch as we would love to see how you progress.
 
 Create a Pull Request from `solution` to `master` under your own repo. Add a notes in the PR description if there is anything you want to mention, e.g. extra details you added or functional choice you made or things that you could improve.
+
+## Technology
+This project is written in React with Typescript. However, it is not required for you to complete this test in Typescript. If this is your first time using Typescript, you can quickly (within 5 minutes) get started after reading this [guide](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html).
+
+We use [styled-component](https://styled-components.com/docs/basics#getting-started) for styling in this project. Feel free to use `css` or `sass` if you are more comfortable with them.
 
 ## Tasks
 ### 1. Implement search and sort of students
