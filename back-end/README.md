@@ -6,6 +6,10 @@ This test has all the necessary components for a functional app with some missin
 
 Please fork this repo under your own github account and create a branch named `solution` once you are ready to start and commit as you would normally do under your own `solution` branch as we would love to see how you progress.
 
+### Note: Do not create Pull Request. 
+
+Share the link of the forked repository once you are finished with your `solution`.
+
 ## Technology
 This project is mainly written in Typescript with Node. If you are not  familar with Typescript, you can check out this quick start guide [here](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html).
 
