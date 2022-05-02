@@ -1,6 +1,11 @@
 # Back End Engineering Test
 At Orah, most of our back end services are written in Typescript/Javascript/Node. This project shares similarities with our main web application in terms of technologies used. Hopefully this will give you some idea of what its like to be working on the team at Orah as you are working on this project.
 
+## Instructions
+This test has all the necessary components for a functional app with some missing functionality which you will need to implement, however please feel free to add any files/components you deem useful.
+
+Please fork this repo under your own github account and create a branch named `solution` once you are ready to start and commit as you would normally do under your own `solution` branch as we would love to see how you progress.
+
 ## Technology
 This project is mainly written in Typescript with Node. If you are not  familar with Typescript, you can check out this quick start guide [here](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html).
 
