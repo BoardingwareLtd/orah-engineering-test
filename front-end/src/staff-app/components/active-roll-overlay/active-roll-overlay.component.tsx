@@ -4,14 +4,30 @@ import Button from "@material-ui/core/Button"
 import { BorderRadius, Spacing } from "shared/styles/styles"
 import { RollStateList } from "staff-app/components/roll-state/roll-state-list.component"
 
-export type ActiveRollAction = "filter" | "exit"
+export type ActiveRollAction = "complete" | "exit"
 interface Props {
   isActive: boolean
   onItemClick: (action: ActiveRollAction, value?: string) => void
+  roleStatus: any
 }
 
 export const ActiveRollOverlay: React.FC<Props> = (props) => {
-  const { isActive, onItemClick } = props
+  const { isActive, onItemClick, roleStatus } = props
+  let presentLength = Object.keys(roleStatus).filter((key) => {
+    if (roleStatus[key] === "present") {
+      return key
+    }
+  }).length
+  let lateLength = Object.keys(roleStatus).filter((key) => {
+    if (roleStatus[key] === "late") {
+      return key
+    }
+  }).length
+  let absentLength = Object.keys(roleStatus).filter((key) => {
+    if (roleStatus[key] === "absent") {
+      return key
+    }
+  }).length
 
   return (
     <S.Overlay isActive={isActive}>
@@ -20,17 +36,17 @@ export const ActiveRollOverlay: React.FC<Props> = (props) => {
         <div>
           <RollStateList
             stateList={[
-              { type: "all", count: 0 },
-              { type: "present", count: 0 },
-              { type: "late", count: 0 },
-              { type: "absent", count: 0 },
+              { type: "all", count: Object.keys(roleStatus).length },
+              { type: "present", count: presentLength },
+              { type: "late", count: lateLength || 0 },
+              { type: "absent", count: absentLength || 0 },
             ]}
           />
           <div style={{ marginTop: Spacing.u6 }}>
             <Button color="inherit" onClick={() => onItemClick("exit")}>
               Exit
             </Button>
-            <Button color="inherit" style={{ marginLeft: Spacing.u2 }} onClick={() => onItemClick("exit")}>
+            <Button color="inherit" style={{ marginLeft: Spacing.u2 }} onClick={() => onItemClick("complete")}>
               Complete
             </Button>
           </div>

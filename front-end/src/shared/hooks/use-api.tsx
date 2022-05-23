@@ -4,17 +4,17 @@ import { RollInput } from "shared/models/roll"
 import { getHomeboardStudents } from "api/get-homeboard-students"
 import { getActivities } from "api/get-activities"
 import { saveActiveRoll } from "api/save-active-roll"
-
+import { SearchParams } from "shared/interfaces/search.interface"
 interface Options {
   url: Endpoint
   initialLoadState?: LoadState
 }
+
 export function useApi<ReturnType = {}>({ url, initialLoadState = "loading" }: Options) {
   const [state, dispatch] = useReducer(stateReducer<ReturnType>(), { data: undefined, loadState: initialLoadState, error: undefined })
   const callApi = useCallback(
     async (params?: object) => {
       dispatch({ type: "loading" })
-
       function process(result: ApiResponse<ReturnType>) {
         if (result.success) {
           dispatch({ type: "success", result: result })
@@ -25,7 +25,7 @@ export function useApi<ReturnType = {}>({ url, initialLoadState = "loading" }: O
 
       switch (url) {
         case "get-homeboard-students":
-          return getHomeboardStudents().then(process)
+          return getHomeboardStudents(params as SearchParams).then(process)
         case "get-activities":
           return getActivities().then(process)
         case "save-roll":
