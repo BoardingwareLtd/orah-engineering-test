@@ -115,7 +115,7 @@ export const Routes = [
     method: "get",
     route: "/group/groupstudents",
     controller: GroupController,
-    action: "getgroupstudents",
+    action: "getGroupStudents",
   }
 ]
 

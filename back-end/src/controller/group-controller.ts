@@ -23,15 +23,6 @@ export class GroupController {
     }
   }
 
-  async getgroupstudents(request: Request, response: Response, next: NextFunction) {
-    try {
-      return await this.studentGroupRepository.find()
-      // return groups;
-    } catch (error) {
-      return next(error)
-    }
-  }
-
   async createGroup(request: Request, response: Response, next: NextFunction) {
     try {
       const { body: params } = request
@@ -97,6 +88,15 @@ export class GroupController {
     try {
       // Task 1:
       // Return the list of Students that are in a Group
+          const { body: params } = request
+          const group = await this.groupRepository.findOne(params.id)
+          if(!group){
+            return { message: 'Group not found' };
+          }
+          const studentrolemapping = await this.studentRollStateRepository.find()
+          const rolls = await this.rollRepository.find()
+          return await this.get_student_group_mapping(group, rolls, studentrolemapping)
+
     } catch (error) {
       return next(error)
     }
@@ -117,7 +117,7 @@ export class GroupController {
           const studentrolemapping = await this.studentRollStateRepository.find()
           const rolls = await this.rollRepository.find()
           const promises = groups.map(async (group) => {
-            let studentgroupmapping = this.get_student_group_mapping(group, rolls, studentrolemapping)
+            let studentgroupmapping = await this.get_student_group_mapping(group, rolls, studentrolemapping)
             // 3. Add the list of students that match the filter to the group
             await this.pushstudentgroupmapping_to_db(studentgroupmapping, group)
           })
@@ -133,7 +133,7 @@ export class GroupController {
     }
   }
 
-  private get_student_group_mapping(group: Group, rolls: Roll[], studentrolemapping: StudentRollState[]) {
+  private async get_student_group_mapping(group: Group, rolls: Roll[], studentrolemapping: StudentRollState[]) {
     let studentgroupmapping = []
     const { id, number_of_weeks, roll_states, incidents, ltmt } = group
     const fromDate = new Date()
