@@ -16,8 +16,7 @@ export class GroupController {
 
   async allGroups(request: Request, response: Response, next: NextFunction) {
     try {
-      const groups = await this.groupRepository.find()
-      return groups
+      return await this.groupRepository.find()
     } catch (error) {
       return next(error)
     }
@@ -91,7 +90,7 @@ export class GroupController {
           const { body: params } = request
           const group = await this.groupRepository.findOne(params.id)
           if(!group){
-            return { message: 'Group not found' };
+            throw new Error("Group not found")
           }
           const studentrolemapping = await this.studentRollStateRepository.find()
           const rolls = await this.rollRepository.find()
