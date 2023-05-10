@@ -6,6 +6,7 @@ import { Roll } from "../entity/roll.entity"
 import { StudentRollState } from "../entity/student-roll-state.entity"
 import { CreateGroupStudentInput } from "../interface/group-student.interface"
 import { CreateGroupInput, UpdateGroupInput } from "../interface/group.interface"
+import { ltmtSymbols } from "../utils/enum"
 
 export class GroupController {
   private groupRepository = getRepository(Group)
@@ -157,15 +158,20 @@ export class GroupController {
       studentCounts[studentId] = (studentCounts[studentId] || 0) + 1
     }
     Object.entries(studentCounts).forEach(async ([key, value]) => {
-      await this.pushtoStudentGroupHelper(Number(key), group.id, Number(value))
+      if(group.ltmt===ltmtSymbols.GREATER_THAN && group.incidents<value)
+        await this.pushtoStudentGroupHelper(Number(key), group.id, Number(value), studentgroupmapping.length)
+      else if(group.ltmt===ltmtSymbols.LESS_THAN && group.incidents>value)
+        await this.pushtoStudentGroupHelper(Number(key), group.id, Number(value), studentgroupmapping.length)
     })
   }
 
-  private async pushtoStudentGroupHelper(student_id: number, group_id: number, count: number) {
+  private async pushtoStudentGroupHelper(student_id: number, group_id: number, count: number, groupstudentcount:number) {
     const createGroupStudentInput: CreateGroupStudentInput = {
       student_id: student_id,
       group_id: group_id,
       incident_count: count,
+      run_at: new Date(),
+      student_count: groupstudentcount
     }
     const groupstudent = new GroupStudent()
     groupstudent.prepareToCreate(createGroupStudentInput)
