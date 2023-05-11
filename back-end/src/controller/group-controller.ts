@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { getRepository } from "typeorm"
+import { getRepository, MoreThan, In } from "typeorm"
 import { GroupStudent } from "../entity/group-student.entity"
 import { Group } from "../entity/group.entity"
 import { Roll } from "../entity/roll.entity"
@@ -14,7 +14,7 @@ export class GroupController {
   private studentRollStateRepository = getRepository(StudentRollState)
   private rollRepository = getRepository(Roll)
 
-  async allGroups(request: Request, response: Response, next: NextFunction) {
+  async allGroups(next: NextFunction) {
     try {
       return await this.groupRepository.find()
     } catch (error) {
@@ -22,7 +22,7 @@ export class GroupController {
     }
   }
 
-  async createGroup(request: Request, response: Response, next: NextFunction) {
+  async createGroup(request: Request, next: NextFunction) {
     try {
       const { body: params } = request
 
@@ -43,7 +43,7 @@ export class GroupController {
     }
   }
 
-  async updateGroup(request: Request, response: Response, next: NextFunction) {
+  async updateGroup(request: Request, next: NextFunction) {
     try {
       const { body: params } = request
       const group = await this.groupRepository.findOne(params.id)
@@ -68,7 +68,7 @@ export class GroupController {
     }
   }
 
-  async removeGroup(request: Request, response: Response, next: NextFunction) {
+  async removeGroup(request: Request, next: NextFunction) {
     try {
       const { body: params } = request
       const group = await this.groupRepository.findOne(params.id)
@@ -83,94 +83,92 @@ export class GroupController {
     }
   }
 
-  async getGroupStudents(request: Request, response: Response, next: NextFunction) {
+  async getGroupStudents(request: Request, next: NextFunction) {
     try {
       // Task 1:
       // Return the list of Students that are in a Group
-          const { body: params } = request
-          const group = await this.groupRepository.findOne(params.id)
-          if(!group){
-            throw new Error("Group not found")
-          }
-          const studentrolemapping = await this.studentRollStateRepository.find()
-          const rolls = await this.rollRepository.find()
-          return await this.get_student_group_mapping(group, rolls, studentrolemapping)
-
+      const { body: params } = request
+      const group = await this.groupRepository.findOne(params.id)
+      if (!group) {
+        throw new Error("Group not found")
+      }
+      return await this.get_student_group_mapping(group)
     } catch (error) {
       return next(error)
     }
   }
 
-  async runGroupFilters(request: Request, response: Response, next: NextFunction) {
+  async runGroupFilters(next: NextFunction) {
     try {
       // 1. Clear out the groups (delete all the students from the groups)
-      const groupsstudents = await this.studentGroupRepository.find()
-      groupsstudents.forEach(async (groupsstudent: GroupStudent) => {
-        await this.studentGroupRepository.remove(groupsstudent)
-      })
+      await this.studentGroupRepository.clear();
 
       // 2. For each group, query the student rolls to see which students match the filter for the group
-      new Promise(async (resolve, reject) => {
-        try {
-          const groups = await this.groupRepository.find()
-          const studentrolemapping = await this.studentRollStateRepository.find()
-          const rolls = await this.rollRepository.find()
-          const promises = groups.map(async (group) => {
-            let studentgroupmapping = await this.get_student_group_mapping(group, rolls, studentrolemapping)
-            // 3. Add the list of students that match the filter to the group
-            await this.pushstudentgroupmapping_to_db(studentgroupmapping, group)
-          })
+      const groups = await this.groupRepository.find();
+      const promises = groups.map(async (group) => {
+        const studentgroupmapping = await this.get_student_group_mapping(group);
+        // 3. Add the list of students that match the filter to the group
+        await this.pushstudentgroupmapping_to_db(studentgroupmapping, group);
+      });
 
-          await Promise.all(promises)
-        } catch (error) {
-          reject(error)
-        }
-      })
-      return await this.studentGroupRepository.find()
+      await Promise.all(promises);
+      return await this.studentGroupRepository.find();
     } catch (error) {
-      return next(error)
+      return next(error);
     }
   }
 
-  private async get_student_group_mapping(group: Group, rolls: Roll[], studentrolemapping: StudentRollState[]) {
-    let studentgroupmapping = []
-    const { id, number_of_weeks, roll_states, incidents, ltmt } = group
+
+  private async get_student_group_mapping(group: Group) {
+    const { number_of_weeks } = group
     const fromDate = new Date()
     fromDate.setDate(fromDate.getDate() - number_of_weeks * 7)
-    const filtered_rolls = rolls.filter((roll) => {
-      return roll.completed_at >= fromDate
+
+    const filtered_rolls = await this.rollRepository.find({
+      where: {
+        completed_at: MoreThan(fromDate),
+      },
     })
 
-    filtered_rolls.map((roll) => {
-      const studentlist_in_roll = studentrolemapping.filter((stdrole) => {
-        return stdrole.roll_id == roll.id && group.roll_states.split(",").includes(stdrole.state)
-      })
-      studentgroupmapping = [...studentgroupmapping, ...studentlist_in_roll]
+    const rollIds = filtered_rolls.map((roll) => roll.id)
+    const studentGroupMapping = await this.studentRollStateRepository.find({
+      where: {
+        roll_id: In(rollIds),
+        state: In(group.roll_states.split(",")),
+      },
     })
-    return studentgroupmapping
+
+    return studentGroupMapping
   }
 
   private async pushstudentgroupmapping_to_db(studentgroupmapping: any[], group: Group) {
-    const studentCounts = {}
-    for (const stdgrpmap of studentgroupmapping) {
-      const studentId = stdgrpmap.student_id
-      studentCounts[studentId] = (studentCounts[studentId] || 0) + 1
-    }
-    Object.entries(studentCounts).forEach(async ([key, value]) => {
-      if(group.ltmt===ltmtSymbols.GREATER_THAN && group.incidents<value)
-        await this.pushtoStudentGroupHelper(Number(key), group.id, Number(value), studentgroupmapping.length)
-      else if(group.ltmt===ltmtSymbols.LESS_THAN && group.incidents>value)
-        await this.pushtoStudentGroupHelper(Number(key), group.id, Number(value), studentgroupmapping.length)
-    })
+    const studentCounts = studentgroupmapping.reduce((counts, stdgrpmap) => {
+      const studentId = stdgrpmap.student_id;
+      counts[studentId] = (counts[studentId] || 0) + 1;
+      return counts;
+    }, {});
+
+    const updatePromises = Object.entries(studentCounts).map(([key, value]) => {
+      if (
+        (group.ltmt === ltmtSymbols.GREATER_THAN && group.incidents < value) ||
+        (group.ltmt === ltmtSymbols.LESS_THAN && group.incidents > value)
+      ) {
+        return this.pushtoStudentGroupHelper(Number(key), group.id, Number(value), studentgroupmapping.length);
+      }
+      return Promise.resolve();
+    });
+
+    await Promise.all(updatePromises);
+
   }
 
-  private async pushtoStudentGroupHelper(student_id: number, group_id: number, count: number, groupstudentcount:number) {
+  private async pushtoStudentGroupHelper(student_id: number, group_id: number, count: number, groupstudentcount: number) {
     const createGroupStudentInput: CreateGroupStudentInput = {
       student_id: student_id,
       group_id: group_id,
       incident_count: count,
       run_at: new Date(),
-      student_count: groupstudentcount
+      student_count: groupstudentcount,
     }
     const groupstudent = new GroupStudent()
     groupstudent.prepareToCreate(createGroupStudentInput)
